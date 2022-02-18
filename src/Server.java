@@ -24,6 +24,17 @@ public class Server implements Runnable {
         existing_clients = new ArrayList();
     }
 
+    public void commandAccepted(InetAddress address, int port) {
+        try {
+            String retCode = "401";
+            byte[] data = retCode.getBytes();
+            DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
+            socket.send(packet);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void run() {
         byte[] buffer = new byte[BUFFER];
         while (true) {
@@ -47,6 +58,11 @@ public class Server implements Runnable {
                         client_ports.add(client_port);
                         client_list.add(user);
 
+                        String retCode = "501";
+                        byte[] data = retCode.getBytes();
+                        DatagramPacket packet = new DatagramPacket(data, data.length, com_packet.getAddress(), com_packet.getPort());
+                        socket.send(packet);
+
                         System.out.println(" ");
                         System.out.print("Users in message board: ");
                         for (int i = 0; i < existing_clients.size(); i++) {
@@ -57,6 +73,8 @@ public class Server implements Runnable {
                             }
                         }
                         System.out.println(" ");
+
+                        commandAccepted(com_packet.getAddress(), com_packet.getPort());
                     } else {
                         String retCode = "502";
                         byte[] data = retCode.getBytes();
@@ -97,8 +115,9 @@ public class Server implements Runnable {
                     String username = packetJson.get("username").getAsString();
                     String msg = packetJson.get("message").getAsString();
 
-                    System.out.println(username + ": "+ msg);
-                    byte[] data = (username + ": " + msg).getBytes();
+                    String fullMsg = "Message sent successfully. \n" + username + ": " + msg;
+                    System.out.println(username + ": " + msg);
+                    byte[] data = fullMsg.getBytes();
 
                     for (int i = 0; i < client_list.size(); i++) {
                         InetAddress cl_address = client_list.get(i).getAddress();
@@ -106,6 +125,8 @@ public class Server implements Runnable {
                         DatagramPacket packet = new DatagramPacket(data, data.length, cl_address, cl_port);
                         socket.send(packet);
                     }
+
+                    commandAccepted(com_packet.getAddress(), com_packet.getPort());
                 }
             }
             catch (Exception e) {

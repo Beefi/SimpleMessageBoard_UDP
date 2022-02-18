@@ -144,24 +144,22 @@ class MessageReceiver implements Runnable {
                 socket.receive(packet);
                 String received = new String(packet.getData(), 0, packet.getLength()).trim();
 
-                if (received.equals("502")) {
-                    System.out.println("Unsuccessful registration, exiting...");
-                    System.exit(502);
-                }
-                if (received.equals("501")) {
-                    System.out.println("User not registered, exiting...");
-                    System.exit(501);
-                }
-                if (received.equals("301")) {
-                    System.out.println("Command unknown, exiting...");
-                    System.exit(301);
-                }
-                if (received.equals("201")) {
-                    System.out.println("Command parameters incomplete, exiting...");
-                    System.exit(201);
-                }
-                else {
-                    System.out.println(received);
+                switch (received) {
+                    case "502" -> {
+                        System.out.println("Unsuccessful registration, exiting...");
+                        System.exit(502);
+                    }
+                    case "501" -> System.out.println("Registered successfully.");
+                    case "401" -> System.out.print("Enter message: ");
+                    case "301" -> {
+                        System.out.println("Command unknown, exiting...");
+                        System.exit(301);
+                    }
+                    case "201" -> {
+                        System.out.println("Command parameters incomplete, exiting...");
+                        System.exit(201);
+                    }
+                    default -> System.out.println(received);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
