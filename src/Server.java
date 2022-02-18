@@ -1,3 +1,6 @@
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
@@ -29,16 +32,14 @@ public class Server implements Runnable {
                 DatagramPacket com_packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(com_packet);
                 String recPacket = new String(buffer, 0, buffer.length).trim();
-
+                JsonObject packetJson = new JsonParser().parse(recPacket).getAsJsonObject();
                 InetAddress clientAddress = com_packet.getAddress();
                 int client_port = com_packet.getPort();
 
-                if (recPacket.equals("register")) {
-                    Arrays.fill(buffer, (byte) 0);
-                    DatagramPacket user_packet = new DatagramPacket(buffer, buffer.length);
-                    socket.receive(user_packet);
+                String command = packetJson.get("command").getAsString();
 
-                    String username = new String(buffer, 0, buffer.length).trim();
+                if (command.equals("register")) {
+                    String username = packetJson.get("username").getAsString();
 
                     User user = new User(clientAddress, username);
                     if (!existing_clients.contains(username)) {
@@ -49,23 +50,23 @@ public class Server implements Runnable {
                         System.out.println(" ");
                         System.out.print("Users in message board: ");
                         for (int i = 0; i < existing_clients.size(); i++) {
-                            System.out.print("['" + existing_clients.get(i) + "'], ");
+                            if (i > 0) {
+                                System.out.print(", ['" + existing_clients.get(i) + "']");
+                            } else {
+                                System.out.print("['" + existing_clients.get(i) + "']");
+                            }
                         }
                         System.out.println(" ");
                     } else {
                         String retCode = "502";
                         byte[] data = retCode.getBytes();
-                        DatagramPacket packet = new DatagramPacket(data, data.length, user_packet.getAddress(), user_packet.getPort());
+                        DatagramPacket packet = new DatagramPacket(data, data.length, com_packet.getAddress(), com_packet.getPort());
                         socket.send(packet);
                     }
                 }
 
-                if (recPacket.equals("deregister")) {
-                    Arrays.fill(buffer, (byte) 0);
-                    DatagramPacket user_packet = new DatagramPacket(buffer, buffer.length);
-                    socket.receive(user_packet);
-
-                    String username = new String(buffer, 0, buffer.length).trim();
+                if (command.equals("deregister")) {
+                    String username = packetJson.get("username").getAsString();
 
                     User user = new User(clientAddress, username);
                     if (existing_clients.contains(username)) {
@@ -75,26 +76,26 @@ public class Server implements Runnable {
                         System.out.println("User " + username + " exiting...");
 
                         System.out.println(" ");
-                        System.out.print("User in message board: ['");
+                        System.out.print("Users in message board: ['");
                         for (int i = 0; i < existing_clients.size(); i++) {
-                            System.out.print(existing_clients.get(i));
+                            if (i > 0) {
+                                System.out.print(", ['" + existing_clients.get(i) + "']");
+                            } else {
+                                System.out.print("['" + existing_clients.get(i) + "']");
+                            }
                         }
                         System.out.println("']");
+                    } else {
+                        String retCode = "501";
+                        byte[] data = retCode.getBytes();
+                        DatagramPacket packet = new DatagramPacket(data, data.length, com_packet.getAddress(), com_packet.getPort());
+                        socket.send(packet);
                     }
                 }
 
-                if (recPacket.equals("msg")) {
-                    Arrays.fill(buffer, (byte) 0);
-                    DatagramPacket user_packet = new DatagramPacket(buffer, buffer.length);
-                    socket.receive(user_packet);
-
-                    String username = new String(buffer, 0, buffer.length).trim();
-
-                    Arrays.fill(buffer, (byte) 0);
-                    DatagramPacket msg_packet = new DatagramPacket(buffer, buffer.length);
-                    socket.receive(msg_packet);
-
-                    String msg = new String(buffer, 0, buffer.length).trim();
+                if (command.equals("msg")) {
+                    String username = packetJson.get("username").getAsString();
+                    String msg = packetJson.get("message").getAsString();
 
                     System.out.println(username + ": "+ msg);
                     byte[] data = (username + ": " + msg).getBytes();
