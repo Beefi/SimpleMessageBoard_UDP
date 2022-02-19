@@ -24,17 +24,6 @@ public class Server implements Runnable {
         existing_clients = new ArrayList();
     }
 
-    public void commandAccepted(InetAddress address, int port) {
-        try {
-            String retCode = "401";
-            byte[] data = retCode.getBytes();
-            DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
-            socket.send(packet);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public void run() {
         byte[] buffer = new byte[BUFFER];
         while (true) {
@@ -58,12 +47,13 @@ public class Server implements Runnable {
                         client_ports.add(client_port);
                         client_list.add(user);
 
-                        String retCode = "501";
-                        byte[] data = retCode.getBytes();
-                        DatagramPacket packet = new DatagramPacket(data, data.length, com_packet.getAddress(), com_packet.getPort());
+                        JsonObject retJSON = new JsonObject();
+                        retJSON.addProperty("command","ret_code");
+                        retJSON.addProperty("ret_code", 501);
+                        byte[] bufferJSON = retJSON.toString().getBytes();
+                        DatagramPacket packet = new DatagramPacket(bufferJSON, bufferJSON.length, com_packet.getAddress(), com_packet.getPort());
                         socket.send(packet);
 
-                        System.out.println(" ");
                         System.out.print("Users in message board: ");
                         for (int i = 0; i < existing_clients.size(); i++) {
                             if (i > 0) {
@@ -74,11 +64,18 @@ public class Server implements Runnable {
                         }
                         System.out.println(" ");
 
-                        commandAccepted(com_packet.getAddress(), com_packet.getPort());
+                        retJSON = new JsonObject();
+                        retJSON.addProperty("command","ret_code");
+                        retJSON.addProperty("ret_code", 401);
+                        bufferJSON = retJSON.toString().getBytes();
+                        packet = new DatagramPacket(bufferJSON, bufferJSON.length, com_packet.getAddress(), com_packet.getPort());
+                        socket.send(packet);
                     } else {
-                        String retCode = "502";
-                        byte[] data = retCode.getBytes();
-                        DatagramPacket packet = new DatagramPacket(data, data.length, com_packet.getAddress(), com_packet.getPort());
+                        JsonObject retJSON = new JsonObject();
+                        retJSON.addProperty("command","ret_code");
+                        retJSON.addProperty("ret_code", 502);
+                        byte[] bufferJSON = retJSON.toString().getBytes();
+                        DatagramPacket packet = new DatagramPacket(bufferJSON, bufferJSON.length, com_packet.getAddress(), com_packet.getPort());
                         socket.send(packet);
                     }
                 }
@@ -104,9 +101,11 @@ public class Server implements Runnable {
                         }
                         System.out.println("']");
                     } else {
-                        String retCode = "501";
-                        byte[] data = retCode.getBytes();
-                        DatagramPacket packet = new DatagramPacket(data, data.length, com_packet.getAddress(), com_packet.getPort());
+                        JsonObject retJSON = new JsonObject();
+                        retJSON.addProperty("command","ret_code");
+                        retJSON.addProperty("ret_code", 501);
+                        byte[] bufferJSON = retJSON.toString().getBytes();
+                        DatagramPacket packet = new DatagramPacket(bufferJSON, bufferJSON.length, com_packet.getAddress(), com_packet.getPort());
                         socket.send(packet);
                     }
                 }
@@ -114,19 +113,24 @@ public class Server implements Runnable {
                 if (command.equals("msg")) {
                     String username = packetJson.get("username").getAsString();
                     String msg = packetJson.get("message").getAsString();
-
-                    String fullMsg = "Message sent successfully. \n" + username + ": " + msg;
                     System.out.println(username + ": " + msg);
-                    byte[] data = fullMsg.getBytes();
 
-                    for (int i = 0; i < client_list.size(); i++) {
-                        InetAddress cl_address = client_list.get(i).getAddress();
-                        int cl_port = client_ports.get(i);
-                        DatagramPacket packet = new DatagramPacket(data, data.length, cl_address, cl_port);
-                        socket.send(packet);
-                    }
+//                    String fullMsg = "Message sent successfully. \n" + username + ": " + msg;
+//                    byte[] data = fullMsg.getBytes();
+//
+//                    for (int i = 0; i < client_list.size(); i++) {
+//                        InetAddress cl_address = client_list.get(i).getAddress();
+//                        int cl_port = client_ports.get(i);
+//                        DatagramPacket packet = new DatagramPacket(data, data.length, cl_address, cl_port);
+//                        socket.send(packet);
+//                    }
 
-                    commandAccepted(com_packet.getAddress(), com_packet.getPort());
+                    JsonObject retJSON = new JsonObject();
+                    retJSON.addProperty("command","ret_code");
+                    retJSON.addProperty("ret_code", 401);
+                    byte[] bufferJSON = retJSON.toString().getBytes();
+                    DatagramPacket packet = new DatagramPacket(bufferJSON, bufferJSON.length, com_packet.getAddress(), com_packet.getPort());
+                    socket.send(packet);
                 }
             }
             catch (Exception e) {

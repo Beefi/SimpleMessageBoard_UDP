@@ -1,4 +1,5 @@
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutput;
@@ -107,11 +108,15 @@ class MessageSender implements Runnable {
                         msgJSON.addProperty("message", client_msg);
 
                         sendCommand(msgJSON);
+
+                        System.out.println("Message sent successfully.");
                         //sendMessageCommand(msgJSON);
                     }
                     else {
                         msgJSON.addProperty("command", "deregister");
                         msgJSON.addProperty("username", clientName);
+
+                        System.out.println("Disconnecting...");
 
                         sendCommand(msgJSON);
 
@@ -142,20 +147,22 @@ class MessageReceiver implements Runnable {
             try {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
-                String received = new String(packet.getData(), 0, packet.getLength()).trim();
+                String receivedPacket = new String(packet.getData(), 0, packet.getLength()).trim();
+                JsonObject receivedJson = new JsonParser().parse(receivedPacket).getAsJsonObject();
+                int received = receivedJson.get("ret_code").getAsInt();
 
                 switch (received) {
-                    case "502" -> {
+                    case 502 -> {
                         System.out.println("Unsuccessful registration, exiting...");
                         System.exit(502);
                     }
-                    case "501" -> System.out.println("Registered successfully.");
-                    case "401" -> System.out.print("Enter message: ");
-                    case "301" -> {
+                    case 501 -> System.out.println("Registered successfully.");
+                    case 401 -> System.out.print("Enter message: ");
+                    case 301 -> {
                         System.out.println("Command unknown, exiting...");
                         System.exit(301);
                     }
-                    case "201" -> {
+                    case 201 -> {
                         System.out.println("Command parameters incomplete, exiting...");
                         System.exit(201);
                     }
