@@ -113,6 +113,13 @@ class MessageSender implements Runnable {
                         //sendMessageCommand(msgJSON);
                     }
                     else {
+                        msgJSON.addProperty("command", "msg");
+                        msgJSON.addProperty("username", clientName);
+                        msgJSON.addProperty("message", client_msg);
+
+                        sendCommand(msgJSON);
+
+                        msgJSON = new JsonObject();
                         msgJSON.addProperty("command", "deregister");
                         msgJSON.addProperty("username", clientName);
 
