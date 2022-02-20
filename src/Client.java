@@ -149,7 +149,7 @@ class MessageReceiver implements Runnable {
                 socket.receive(packet);
                 String receivedPacket = new String(packet.getData(), 0, packet.getLength()).trim();
                 JsonObject receivedJson = new JsonParser().parse(receivedPacket).getAsJsonObject();
-                int received = receivedJson.get("ret_code").getAsInt();
+                int received = receivedJson.get("code_no").getAsInt();
 
                 switch (received) {
                     case 502 -> {

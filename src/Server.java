@@ -49,7 +49,7 @@ public class Server implements Runnable {
 
                         JsonObject retJSON = new JsonObject();
                         retJSON.addProperty("command","ret_code");
-                        retJSON.addProperty("ret_code", 501);
+                        retJSON.addProperty("code_no", 501);
                         byte[] bufferJSON = retJSON.toString().getBytes();
                         DatagramPacket packet = new DatagramPacket(bufferJSON, bufferJSON.length, com_packet.getAddress(), com_packet.getPort());
                         socket.send(packet);
@@ -66,14 +66,14 @@ public class Server implements Runnable {
 
                         retJSON = new JsonObject();
                         retJSON.addProperty("command","ret_code");
-                        retJSON.addProperty("ret_code", 401);
+                        retJSON.addProperty("code_no", 401);
                         bufferJSON = retJSON.toString().getBytes();
                         packet = new DatagramPacket(bufferJSON, bufferJSON.length, com_packet.getAddress(), com_packet.getPort());
                         socket.send(packet);
                     } else {
                         JsonObject retJSON = new JsonObject();
                         retJSON.addProperty("command","ret_code");
-                        retJSON.addProperty("ret_code", 502);
+                        retJSON.addProperty("code_no", 502);
                         byte[] bufferJSON = retJSON.toString().getBytes();
                         DatagramPacket packet = new DatagramPacket(bufferJSON, bufferJSON.length, com_packet.getAddress(), com_packet.getPort());
                         socket.send(packet);
@@ -90,8 +90,7 @@ public class Server implements Runnable {
 
                         System.out.println("User " + username + " exiting...");
 
-                        System.out.println(" ");
-                        System.out.print("Users in message board: ['");
+                        System.out.print("Users in message board: ");
                         for (int i = 0; i < existing_clients.size(); i++) {
                             if (i > 0) {
                                 System.out.print(", ['" + existing_clients.get(i) + "']");
@@ -99,11 +98,11 @@ public class Server implements Runnable {
                                 System.out.print("['" + existing_clients.get(i) + "']");
                             }
                         }
-                        System.out.println("']");
+                        System.out.println(" ");
                     } else {
                         JsonObject retJSON = new JsonObject();
                         retJSON.addProperty("command","ret_code");
-                        retJSON.addProperty("ret_code", 501);
+                        retJSON.addProperty("code_no", 501);
                         byte[] bufferJSON = retJSON.toString().getBytes();
                         DatagramPacket packet = new DatagramPacket(bufferJSON, bufferJSON.length, com_packet.getAddress(), com_packet.getPort());
                         socket.send(packet);
@@ -127,7 +126,7 @@ public class Server implements Runnable {
 
                     JsonObject retJSON = new JsonObject();
                     retJSON.addProperty("command","ret_code");
-                    retJSON.addProperty("ret_code", 401);
+                    retJSON.addProperty("code_no", 401);
                     byte[] bufferJSON = retJSON.toString().getBytes();
                     DatagramPacket packet = new DatagramPacket(bufferJSON, bufferJSON.length, com_packet.getAddress(), com_packet.getPort());
                     socket.send(packet);
